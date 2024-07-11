@@ -1,0 +1,597 @@
+---
+openapi: 3.0.0
+info:
+  title: Task Management API
+  description: "This is an information system for task management, inspired by the Trello application."
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+- url: https://virtserver.swaggerhub.com/A45935_1/TaskManegentAPI/1.0.0
+  description: SwaggerHub API Auto Mocking
+- url: http://localhost:9000
+  description: Local server
+tags:
+- name: users
+  description: Operations available to regular users
+- name: boards
+  description: Operations related to board management
+paths:
+  /search/boards/{boardName}:
+    get:
+      tags:
+        - boards
+        summary: Search boards
+        description: Search the boards by the given name at path
+        operationId: searchBoards
+        parameters:
+        - name: name
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        responses:
+          "200":
+            description: One or more boards names match with given name
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                  $ref: '#/components/schemas/Board'
+          "400":
+            description: "invalid input, object invalid"
+          "401":
+            description: Unauthorized
+          "404":
+            description: board not found
+  /users:
+    put:
+      tags:
+      - users
+      summary: Create a new user
+      operationId: createUser
+      requestBody:
+        description: User to add
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewUser'
+      responses:
+        "201":
+          description: user created
+          content:
+            application/json:
+              schema:
+                type: string
+                description: bearerToken
+                example: 468-cdsvy4sg-124
+        "400":
+          description: "invalid input, object invalid"
+        "409":
+          description: this user already exists
+  /users/{userId}:
+    get:
+      tags:
+      - users
+      summary: Get the details of a user
+      operationId: getUser
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: search results matching criteria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserDetails'
+        "400":
+          description: bad input parameter
+  /boards:
+    get:
+      tags:
+      - boards
+      summary: Get the list with all user available boards
+      operationId: getAvailableBoards
+      responses:
+        "200":
+          description: search results matching criteria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Board'
+        "400":
+          description: "invalid input, object invalid"
+        "401":
+          description: Unauthorized
+        "404":
+          description: user not found
+    post:
+      tags:
+      - boards
+      summary: Creates a new board
+      operationId: createBoard
+      requestBody:
+        description: Board to add
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewBoard'
+      responses:
+        "201":
+          description: Board created
+        "400":
+          description: "invalid input, object invalid"
+        "401":
+          description: Unauthorized
+  /boards/{name}:
+    get:
+      tags:
+      - boards
+      summary: Get the detailed information of a board
+      description: Adds an item to the system
+      operationId: boardDetails
+      parameters:
+      - name: name
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: search results matching criteria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Board'
+        "400":
+          description: "invalid input, object invalid"
+        "401":
+          description: Unauthorized
+        "404":
+          description: board not found
+    put:
+      tags:
+      - boards
+      summary: Add a user to the board
+      operationId: addUserToBoard
+      parameters:
+      - name: name
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        description: UserId to add
+        content:
+          application/json:
+            schema:
+              type: string
+              example: caew-353-vds3-235
+      responses:
+        "201":
+          description: user added
+        "400":
+          description: "invalid input, user does not exist"
+        "401":
+          description: Unauthorized
+        "409":
+          description: this user was already added
+  /boards/{name}/users:
+    get:
+      tags:
+      - boards
+      summary: Get the users associated with a board
+      operationId: boardUsers
+      parameters:
+      - name: name
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: users array
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserDetails'
+        "400":
+          description: "invalid input, object invalid"
+        "401":
+          description: Unauthorized
+        "404":
+          description: board not found
+  /boards/{name}/lists:
+    get:
+      tags:
+      - boards
+      summary: Get the lists of a board
+      operationId: getLists
+      parameters:
+      - name: name
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: list array
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/List'
+        "400":
+          description: "invalid input, object invalid"
+        "401":
+          description: Unauthorized
+        "404":
+          description: board not found
+    post:
+      tags:
+      - boards
+      summary: Creates a new list on a board
+      operationId: addList
+      parameters:
+      - name: name
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        description: List to add
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/List'
+      responses:
+        "201":
+          description: List added
+        "400":
+          description: "invalid input, object invalid"
+        "401":
+          description: Unauthorized
+  /lists/{listId}:
+    get:
+      tags:
+      - list
+      summary: Get detailed information of a list
+      operationId: listDetails
+      parameters:
+      - name: listId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: list found
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/List'
+        "400":
+          description: "invalid input, object invalid"
+        "401":
+          description: Unauthorized
+        "404":
+          description: list not found
+    delete:
+      tags:
+      - list
+      summary: Delete a list
+      operationId: deleteList
+      parameters:
+      - name: listId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "201":
+          description: list deleted
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/List'
+        "400":
+          description: "invalid input, object invalid"
+        "401":
+          description: Unauthorized
+        "404":
+          description: list not found
+  /lists/{listId}/card:
+    get:
+      tags:
+      - List
+      summary: Get the set of cards in a list
+      operationId: getCards
+      parameters:
+      - name: listId
+        in: path
+        description: Id of the list associated to a board
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: list of cards
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Card'
+        "400":
+          description: "invalid input, object invalid"
+        "401":
+          description: Unauthorized
+        "404":
+          description: list not found
+    post:
+      tags:
+      - List
+      summary: Creates a new card in a list
+      operationId: createCard
+      parameters:
+      - name: listId
+        in: path
+        description: Id of the list associated to a board
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        description: List to add
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Card'
+      responses:
+        "201":
+          description: card added
+        "400":
+          description: "invalid input, object invalid"
+        "401":
+          description: Unauthorized
+        "404":
+          description: list not found
+  /card/{cardId}:
+    get:
+      tags:
+      - Card
+      summary: Get the detailed information of a card
+      operationId: cardDetails
+      parameters:
+      - name: cardId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: card details
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Card'
+        "400":
+          description: "invalid input, object invalid"
+        "401":
+          description: Unauthorized
+        "404":
+          description: card not found
+    delete:
+      tags:
+      - Card
+      summary: Delete a card
+      operationId: deleteCard
+      parameters:
+      - name: cardId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "201":
+          description: card deleted
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Card'
+        "400":
+          description: "invalid input, object invalid"
+        "401":
+          description: Unauthorized
+        "404":
+          description: card not found
+  /card/{cardId}/{lid}/{cix}:
+    put:
+      tags:
+      - Card
+      summary: Moves a card to the specified list
+      operationId: moveCard
+      parameters:
+      - name: cardId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: lid
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: cix
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      responses:
+        "201":
+          description: card moved
+        "400":
+          description: "invalid input, object invalid"
+        "401":
+          description: Unauthorized
+        "409":
+          description: can't move card
+        "404":
+          description: list not found
+components:
+  schemas:
+    UserDetails:
+      required:
+      - bearer
+      - email
+      - name
+      - number
+      type: object
+      properties:
+        name:
+          type: string
+          example: user1234
+        email:
+          type: string
+          example: user@ipl.pt
+        bearer:
+          type: string
+        number:
+          type: string
+    NewUser:
+      required:
+      - email
+      - name
+      - password
+      type: object
+      properties:
+        name:
+          type: string
+          example: user1234
+        email:
+          type: string
+          format: url
+          example: user@ipl.pt
+        password:
+          type: string
+          example: 408-867-5309
+    Board:
+      required:
+      - description
+      - lists
+      - name
+      - users
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        lists:
+          type: object
+        users:
+          type: object
+    NewBoard:
+      required:
+      - description
+      - name
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+    List:
+      required:
+      - board
+      - name
+      type: object
+      properties:
+        name:
+          type: string
+    Schema:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        board:
+          type: string
+        phase:
+          type: object
+        tasks:
+          type: array
+          items:
+            type: string
+    Card:
+      required:
+      - archived
+      - creationDate
+      - description
+      - name
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        creationDate:
+          type: object
+        conclusionDate:
+          type: object
+        users:
+          type: object
